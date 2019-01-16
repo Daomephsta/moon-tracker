@@ -1,0 +1,12 @@
+[package]
+name = "moon-tracker"
+version = "2.0.0"
+authors = ["Daomephsta <dtnilfisk@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+azul = { git = "https://github.com/maps4print/azul", rev = "5098ab3593621e606066035de3c9d99d26380d2c" }
+serde = "1.0.83"
+serde_derive = "1.0.83"
+serde_json = "1.0.34"
+simple-error = "0.1.13"
