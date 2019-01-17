@@ -1,33 +1,27 @@
-extern crate azul;
 extern crate serde_json;
 #[macro_use] extern crate serde_derive;
-#[macro_use] extern crate simple_error;
 
 use std::io::{stdin, Read};
 use std::path::Path;
 
-
 mod config;
-mod gui;
-mod errors;
+mod cli;
 
 fn main() 
 {
-    if let Err(e) = run()
+    let old_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| 
     {
-        println!("Application error: {}", e);
+        old_hook(info);
         pause_on_exit();
-    }
-}
+    }));
 
-fn run() -> Result<(), errors::InternalError>
-{
     let state = State
     {
-        config: config::load_config(Path::new("config.json"))?
+        config: config::load_config(Path::new("config.json"))
     };
 
-    return Ok(());
+    cli::start(&state);
 }
 
 fn pause_on_exit() 

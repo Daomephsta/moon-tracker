@@ -1,9 +1,7 @@
-use crate::errors::InternalError;
-use simple_error::SimpleError;
 use std::fs::File;
 use std::path::Path;
 
-pub fn load_config(path: &Path) -> Result<Configuration, InternalError>
+pub fn load_config(path: &Path) -> Configuration
 {
     if path.exists()
     {
@@ -14,9 +12,9 @@ pub fn load_config(path: &Path) -> Result<Configuration, InternalError>
             Ok(config) => 
             {
                 println!("Config loaded.");
-                Ok(config)
+                config
             },
-            Err(e) => bail!("Unable to parse config\nCause: {}", &e)
+            Err(e) => panic!("Unable to parse config\nCause: {}", &e)
         }
     }
     else 
@@ -27,7 +25,7 @@ pub fn load_config(path: &Path) -> Result<Configuration, InternalError>
     }
 }
 
-pub fn create_example_config(path: &Path) -> Result<Configuration, InternalError>
+pub fn create_example_config(path: &Path) -> Configuration
 {
     let example_cfg = Configuration 
     {
@@ -42,10 +40,10 @@ pub fn create_example_config(path: &Path) -> Result<Configuration, InternalError
     };
 
     let file = File::create(&path)
-        .map_err(|e| SimpleError::new(format!("Unable to create example config\nCause: {}", &e)))?;
+        .expect("Unable to create example config");
     serde_json::to_writer_pretty(&file, &example_cfg)
-        .map_err(|e| SimpleError::new(format!("Unable to write example config\nCause: {}", &e)))?;
-    return Ok(example_cfg);
+        .expect("Unable to write example config");
+    return example_cfg;
 }
 
 #[derive(Serialize, Deserialize, Debug)]
