@@ -58,7 +58,7 @@ fn run(state: &crate::State)
         {
             let numerator = day as f64 % moon.cycle_length();
             //Integer divide the numerator by the moon's phase length (1/8 of cycle length), then modulo the result by 8
-            let f: usize = (numerator as usize / (moon.cycle_length() / 8.0) as usize) % 8;
+            let f: usize = ((numerator / (moon.cycle_length() / 8.0)) % 8.0) as usize;
             let phase = PHASES[f];
             println!("{} will be {}/{} through its cycle ({})", moon.name(), numerator, moon.cycle_length(), phase)
         }
