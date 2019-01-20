@@ -6,19 +6,28 @@ const PHASES: [&str; 8] = ["New moon", "Waxing crescent", "First quarter", "Waxi
 
 pub fn start(state: &mut crate::State, config_watcher: ConfigWatcher)
 {
-    loop
+    'cli: loop
     {
-        let mut should_run = String::new();
-        println!("Run Moon Tracker? (Y/N)");
-        stdin().read_line(&mut should_run)
-            .expect("Unable to read from standard input");
-        if should_run.trim().to_lowercase() == "y"
+        loop 
         {
-            run(&state);
-        }
-        else
-        {
-            break;
+            let mut should_run = String::new();
+            println!("Run Moon Tracker? (Y/N)");
+            stdin().read_line(&mut should_run)
+                .expect("Unable to read from standard input");
+            should_run = should_run.trim().to_lowercase();
+            if should_run == "y"
+            {
+                run(&state);
+                break;
+            }
+            else if should_run == "n"
+            {
+                break 'cli;
+            }
+            else
+            {
+                println!("Invalid answer. Valid answers are Y, y, N, and n.");
+            }
         }
         
         if let Ok(event) = config_watcher.try_recv()
