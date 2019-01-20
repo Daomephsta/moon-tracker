@@ -31,29 +31,17 @@ fn main()
         config: config::load_config(Path::new(CONFIG_PATH))
     };
 
-    
     let (watcher_tx, watcher_rx) = mpsc::channel();
     //Notify docs say NOTHING about why either of these might error...
-    let mut watcher = notify::watcher(watcher_tx, Duration::from_secs(1)).unwrap();
-    watcher.watch(Path::new(CONFIG_PATH), RecursiveMode::NonRecursive).unwrap(); 
+    let mut watcher = notify::watcher(watcher_tx, Duration::from_secs(1))
+        .expect("Could not create watcher");
+    watcher.watch(Path::new(CONFIG_PATH), RecursiveMode::NonRecursive)
+        .expect("Could not watch config");;
 
-    let (config_tx, config_rx) = mpsc::channel();
-    thread::Builder::new()
-        .name("config-watcher".to_string())
-        .spawn(move ||
-        {
-            loop
-            {
-                match watcher_rx.recv()
-                {
-                    Ok(event) => config_tx.send(event).unwrap(),
-                    Err(e) => eprintln!("Error in config watcher loop {}", e)
-                }
-            }
-        })
-        .unwrap();
+    let (handler_tx, handler_rx) = mpsc::channel();
+    spawn_watcher_thread(watcher_rx, handler_tx);    
 
-    cli::start(&mut state, config_rx);
+    cli::start(&mut state, handler_rx);
 }
 
 fn pause_on_exit() 
@@ -62,16 +50,24 @@ fn pause_on_exit()
     stdin().read(&mut [0]).unwrap();
 }
 
-/*fn create_config_watcher(config_path: &'static str) -> mpsc::Receiver<DebouncedEvent>
+fn spawn_watcher_thread(watcher_rx: mpsc::Receiver<DebouncedEvent>, handler_tx: mpsc::Sender<DebouncedEvent>) -> thread::JoinHandle<()>
 {
-        
-    return watcher_rx;
-}*/
-
-/*fn spawn_watcher_thread(watcher_rx: mpsc::Receiver<DebouncedEvent>, config_tx: mpsc::Sender<DebouncedEvent>) -> thread::JoinHandle<()>
-{
-    
-}*/
+    thread::Builder::new()
+        .name("config-watcher".to_string())
+        .spawn(move ||
+        {
+            loop
+            {
+                match watcher_rx.recv()
+                {
+                    Ok(event) => handler_tx.send(event)
+                        .expect("Could not send config file event from watcher to handler"),
+                    Err(e) => eprintln!("Error in config watcher loop {}", e)
+                }
+            }
+        })
+        .expect("Could not spawn config watcher thread")
+}
 
 #[derive(Debug)]
 pub struct State
