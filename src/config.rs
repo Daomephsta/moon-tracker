@@ -33,8 +33,13 @@ pub fn create_example_config(path: &Path) -> Configuration
         [
             Moon
             {
-                name: "Luna".to_string(),
-                cycle_length: 31.0
+                name: "Foo".to_string(),
+                cycle_length: 24.51
+            },
+            Moon
+            {
+                name: "Bar".to_string(),
+                cycle_length: 5.0
             }
         ]
     };
