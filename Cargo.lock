@@ -214,7 +214,7 @@ dependencies = [
 
 [[package]]
 name = "moon-tracker"
-version = "2.0.0"
+version = "2.1.0"
 dependencies = [
  "notify 4.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.83 (registry+https://github.com/rust-lang/crates.io-index)",
