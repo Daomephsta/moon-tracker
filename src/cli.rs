@@ -1,10 +1,10 @@
 use std::io::stdin;
-use crate::ConfigWatcher;
 use notify::DebouncedEvent;
+use crate::ConfigWatcher;
 
 const PHASES: [&str; 8] = ["New moon", "Waxing crescent", "First quarter", "Waxing gibbous", "Full moon", "Waning gibbous", "Third quarter", "Waning crescent"];
 
-pub fn start(state: &crate::State, config_watcher: ConfigWatcher)
+pub fn start(state: &mut crate::State, config_watcher: ConfigWatcher)
 {
     loop
     {
@@ -20,16 +20,13 @@ pub fn start(state: &crate::State, config_watcher: ConfigWatcher)
         {
             break;
         }
-        println!("Checking config watcher");
-        let recv = config_watcher.try_recv();
-        println!("{:?}", recv);
-        if let Ok(event) = recv
+        
+        if let Ok(event) = config_watcher.try_recv()
         {
-            println!("Event {:?}", event);
             match event
             {
-                DebouncedEvent::NoticeWrite(_) | DebouncedEvent::Write(_) => println!("Config edited!"),
-                DebouncedEvent::Error(err, _) => println!("Config watcher errored {}", err),
+                DebouncedEvent::NoticeWrite(path) | DebouncedEvent::Write(path) => state.set_config(crate::config::load_config(&path)), 
+                DebouncedEvent::Error(e, _) => eprintln!("An error occurred in the config watcher {}", e),
                 _ => {}
             }
         }
